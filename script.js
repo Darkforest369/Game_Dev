@@ -1,3 +1,18 @@
+const fallbackWords = [
+    'about', 'above', 'across', 'action', 'after', 'again', 'against', 'almost', 'along', 'already',
+    'always', 'among', 'answer', 'around', 'because', 'before', 'begin', 'being', 'below', 'between',
+    'better', 'bring', 'build', 'change', 'children', 'close', 'different', 'during', 'early', 'enough',
+    'every', 'example', 'family', 'father', 'follow', 'found', 'friend', 'great', 'group', 'happen',
+    'important', 'interest', 'keep', 'large', 'learn', 'leave', 'might', 'music', 'never', 'number',
+    'often', 'people', 'place', 'point', 'problem', 'program', 'right', 'something', 'sound', 'start',
+    'still', 'system', 'think', 'through', 'together', 'under', 'until', 'water', 'where', 'world'
+];
+let wordList = fallbackWords;
+
+function getRandomWord() {
+    return wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const keys = document.querySelectorAll('.key');
     const pressedKeys = new Set();
@@ -10,11 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameArea = document.querySelector('#game-area');
     const judgmentLine = document.querySelector('.judgment-line');
     const feedback = document.querySelector('.judgment-feedback');
-    const targetWordDisplay = document.querySelector('#target-word');
+    const previousWordDisplay = document.querySelector('#previous-word');
+    const currentWordDisplay = document.querySelector('#current-word');
+    const nextWordDisplay = document.querySelector('#next-word');
     const startButton = document.querySelector('#start-button');
     const scoreDisplay = document.querySelector('#score');
     const comboDisplay = document.querySelector('#combo');
-    const words = ['ANOTHER', 'RHYTHM', 'MUSIC', 'GAME', 'KEYBOARD'];
     const notes = [];
     const glowTimers = new WeakMap();
     const noteSize = 40;
@@ -24,25 +40,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const hitWindow = 150;
     let score = 0;
     let combo = 0;
-    let wordIndex = 0;
+    let prevWord = '';
+    let currentWord = getRandomWord();
+    let nextWord = getRandomWord();
     let nextLetterIndex = 0;
-    let wordResults = Array.from(words[wordIndex], () => null);
+    let wordResults = Array.from(currentWord, () => null);
     let audioContext = null;
     let isRunning = false;
     let nextBeatAt = 0;
 
     function renderWord() {
-        const word = words[wordIndex];
-        targetWordDisplay.replaceChildren();
-        targetWordDisplay.setAttribute('aria-label', `Target word: ${word}`);
+        previousWordDisplay.textContent = prevWord;
+        nextWordDisplay.textContent = nextWord;
+        currentWordDisplay.replaceChildren();
+        currentWordDisplay.setAttribute('aria-label', `Target word: ${currentWord}`);
 
-        Array.from(word).forEach((letter, index) => {
+        Array.from(currentWord).forEach((letter, index) => {
             const letterElement = document.createElement('span');
             letterElement.className = 'word-letter';
             if (wordResults[index]) letterElement.classList.add(wordResults[index]);
             letterElement.textContent = letter;
-            targetWordDisplay.append(letterElement);
+            currentWordDisplay.append(letterElement);
         });
+    }
+
+    function initializeWordStream() {
+        prevWord = '';
+        currentWord = getRandomWord();
+        nextWord = getRandomWord();
+        nextLetterIndex = 0;
+        wordResults = Array.from(currentWord, () => null);
+        renderWord();
+    }
+
+    function shiftWordStream() {
+        prevWord = currentWord;
+        currentWord = nextWord;
+        nextWord = getRandomWord();
+        nextLetterIndex = 0;
+        wordResults = Array.from(currentWord, () => null);
+        renderWord();
     }
 
     function triggerKeyGlow(key) {
@@ -84,13 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             note.element.remove();
         }
 
-        const word = words[wordIndex];
-        if (nextLetterIndex === word.length && wordResults.every(Boolean)) {
-            wordIndex = (wordIndex + 1) % words.length;
-            nextLetterIndex = 0;
-            wordResults = Array.from(words[wordIndex], () => null);
-            renderWord();
-        }
+        if (nextLetterIndex === currentWord.length && wordResults.every(Boolean)) shiftWordStream();
     }
 
     function handleKeyPress(key) {
@@ -124,11 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnNote(beatAt) {
-        const word = words[wordIndex];
-        if (nextLetterIndex >= word.length) return;
+        if (nextLetterIndex >= currentWord.length) return;
 
         const letterIndex = nextLetterIndex;
-        const key = word[letterIndex].toLowerCase();
+        const key = currentWord[letterIndex].toLowerCase();
         const element = document.createElement('div');
         const note = {
             key,
@@ -226,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         isRunning = true;
+        initializeWordStream();
         startButton.hidden = true;
         nextBeatAt = performance.now() + 100;
         scheduleBeat();
@@ -256,5 +287,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     renderWord();
+    fetch('https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt')
+        .then(response => {
+            if (!response.ok) throw new Error('Dictionary request failed');
+            return response.text();
+        })
+        .then(dictionary => {
+            const fetchedWords = dictionary.split('\n').map(word => word.trim()).filter(word => word.length >= 3);
+            if (fetchedWords.length) wordList = fetchedWords;
+            if (!isRunning) initializeWordStream();
+        })
+        .catch(() => {
+            wordList = fallbackWords;
+        });
     requestAnimationFrame(animateNotes);
 });
