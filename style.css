@@ -1,8 +1,6 @@
 :root {
     --glow-color: #00FFFF;
-    --key-bg: rgba(20, 25, 35, 0.85);
-    --key-border: rgba(255, 255, 255, 0.1);
-    --key-text: #ffffff;
+    color-scheme: only light; /* Forces light mode, prevents auto-inversion */
 }
 
 * {
@@ -14,85 +12,85 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
-    height: 100vh;
+    min-height: 100vh;
+    margin: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #000;
+    background-color: #111;
+    overflow: hidden;
 }
 
-/* Background */
-.background-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+/* Blurred Background Image */
+body::before {
+    content: "";
+    position: fixed;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    z-index: -2;
     background-image: url('bg.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    filter: blur(12px);
-    z-index: -2;
-    transform: scale(1.05); /* Prevents blurry white edges on some browsers */
+    filter: blur(10px);
+    opacity: 0.8;
 }
 
-.overlay {
-    position: absolute;
+/* Dark Overlay for Contrast */
+body::after {
+    content: "";
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.65);
+    width: 100%;
+    height: 100%;
     z-index: -1;
+    background: rgba(0, 0, 0, 0.6);
 }
 
 /* Keyboard Layout */
 .keyboard-container {
-    z-index: 1;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    z-index: 10;
 }
 
 .keyboard {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 40px;
+    gap: clamp(8px, 1.5vw, 16px);
+    width: 100%;
 }
 
 .key-row {
     display: flex;
     justify-content: center;
-    gap: 12px;
-}
-
-.row-2 {
-    transform: translateX(20px); /* Stagger for standard layout */
-}
-
-.row-3 {
-    transform: translateX(60px);
+    gap: clamp(6px, 1vw, 12px);
 }
 
 /* Individual Keys */
 .key {
-    width: 64px;
-    height: 64px;
-    background-color: var(--key-bg);
-    border: 2px solid var(--key-border);
+    width: clamp(40px, 5vw, 64px);
+    height: clamp(40px, 5vw, 64px);
+    background-color: rgba(20, 20, 25, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px;
+    font-size: clamp(16px, 2.5vw, 24px);
     font-weight: 600;
-    color: var(--key-text);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.05);
-    transition: all 0.2s ease-out; /* Smooth fade out */
+    color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.05);
+    transition: all 0.1s ease-out;
 }
 
 /* Active Key State (Pressed) */
@@ -104,8 +102,8 @@ body {
         0 0 30px var(--glow-color),
         inset 0 0 10px var(--glow-color);
     transform: scale(0.95);
-    transition: all 0.05s ease-out; /* Instant glow */
-    color: #fff;
+    transition: all 0.05s ease-out;
+    color: #ffffff;
     text-shadow: 0 0 8px var(--glow-color);
 }
 
@@ -115,50 +113,41 @@ body {
     top: 20px;
     right: 20px;
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 15px 20px;
-    border-radius: 12px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
     z-index: 10;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    font-family: sans-serif;
 }
 
-.settings-panel label {
-    color: #fff;
+.settings-panel h2 {
+    margin: 0;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-/* Color Picker Styling */
-input[type="color"] {
-    appearance: none;
-    -webkit-appearance: none;
-    border: none;
-    width: 44px;
-    height: 44px;
+#colorWheel {
     border-radius: 50%;
-    cursor: pointer;
-    background: none;
-    padding: 0;
+    cursor: crosshair;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
-input[type="color"]::-webkit-color-swatch-wrapper {
-    padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-    border: 2px solid rgba(255, 255, 255, 0.5);
+.color-preview {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-}
-
-input[type="color"]::-moz-color-swatch {
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.1s;
 }
