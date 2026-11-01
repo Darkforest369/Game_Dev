@@ -81,6 +81,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
@@ -106,21 +107,26 @@ body {
 
 .previous-word,
 .next-word {
+    flex: 1;
     color: rgba(255, 255, 255, 0.4);
     font-size: 24px;
 }
 
 .current-word {
-    display: block;
+    display: flex;
+    flex: 2;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
     color: #fff;
-    font-size: clamp(30px, 5vw, 48px);
+    font-size: clamp(16px, 4vw, 36px);
     font-weight: 800;
     text-shadow: 0 0 12px rgba(255, 255, 255, 0.32);
 }
 
 .char {
     display: inline-block;
-    margin: 0 3px;
+    margin: 0 clamp(0px, 0.4vw, 3px);
     color: rgba(255, 255, 255, 0.68);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.18);
 }

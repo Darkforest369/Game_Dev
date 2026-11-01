@@ -9,18 +9,14 @@ const fallbackWords = [
 ];
 let wordList = [];
 const activeNotes = [];
-const rhythmValues = [1, 0.5, 0.25, 2];
+const rhythmPatterns = [1.0, 1.0, 0.5, 0.5, 0.75, 0.25, 0.25];
 
 function getRandomWord() {
     return wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
 }
 
 function getRandomRhythmValue() {
-    const roll = Math.random();
-    if (roll < 0.6) return rhythmValues[0];
-    if (roll < 0.8) return rhythmValues[1];
-    if (roll < 0.9) return rhythmValues[2];
-    return rhythmValues[3];
+    return rhythmPatterns[Math.floor(Math.random() * rhythmPatterns.length)];
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -174,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
             key,
             letterIndex,
             element,
+            beatValue: currentWordRhythms[letterIndex],
             startAt: spawnAt,
             targetAt: spawnAt + fallDuration,
             glowing: false
@@ -186,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeNotes.push(note);
         element.style.left = `${(gameArea.clientWidth - noteSize) / 2}px`;
         nextLetterToSpawnIndex += 1;
-        nextNoteAt = spawnAt + beatDuration * currentWordRhythms[letterIndex];
+        nextNoteAt = spawnAt + beatDuration * note.beatValue;
     }
 
     function gameLoop(now) {
