@@ -1,6 +1,6 @@
 :root {
-    --glow-color: #00FFFF;
-    color-scheme: only light; /* Forces light mode, prevents auto-inversion */
+    --glow-color: #00ffff;
+    color-scheme: only light;
 }
 
 * {
@@ -15,39 +15,41 @@ body {
     min-height: 100vh;
     margin: 0;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #111;
+    background-color: #1a1a1a;
     overflow: hidden;
 }
 
-/* Blurred Background Image */
-body::before {
-    content: "";
+.bg-wrapper {
     position: fixed;
-    top: -5%;
-    left: -5%;
-    width: 110%;
-    height: 110%;
-    z-index: -2;
-    background-image: url('bg.jpg');
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+    background-color: #1a1a1a;
+}
+
+.bg-image {
+    width: 100%;
+    height: 100%;
+    background-image: url('./bg.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     filter: blur(10px);
+    transform: scale(1.1);
     opacity: 0.8;
 }
 
-/* Dark Overlay for Contrast */
-body::after {
-    content: "";
-    position: fixed;
+.bg-overlay {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
     background: rgba(0, 0, 0, 0.6);
 }
 
@@ -110,44 +112,43 @@ body::after {
 /* Glassmorphism Settings Panel */
 .settings-panel {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 30px;
+    right: 30px;
+    padding: 20px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    padding: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 15px;
-    z-index: 10;
-    color: #ffffff;
+    align-items: center;
+    z-index: 100;
+}
+
+.settings-label {
+    color: white;
     font-family: sans-serif;
-}
-
-.settings-panel h2 {
-    margin: 0;
     font-size: 14px;
-    font-weight: 600;
     letter-spacing: 1px;
-    text-transform: uppercase;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-#colorWheel {
-    border-radius: 50%;
-    cursor: crosshair;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+.color-options {
+    display: flex;
+    gap: 10px;
 }
 
-.color-preview {
-    width: 36px;
-    height: 36px;
+.color-button {
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    transition: background-color 0.1s;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.color-button:hover {
+    transform: scale(1.2);
 }

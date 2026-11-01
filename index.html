@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="bg-wrapper">
+        <div class="bg-image"></div>
+        <div class="bg-overlay"></div>
+    </div>
+
     <main class="keyboard-container">
         <div class="keyboard">
             <div class="key-row">
@@ -45,9 +50,15 @@
     </main>
 
     <div class="settings-panel">
-        <h2>Glow Color</h2>
-        <canvas id="colorWheel" width="150" height="150"></canvas>
-        <div class="color-preview" id="colorPreview" style="background-color: #00FFFF;"></div>
+        <span class="settings-label">GLOW COLOR</span>
+        <div class="color-options">
+            <button type="button" class="color-button" data-color="#00aaff" aria-label="Blue glow" title="Blue" style="background-color: #00aaff;"></button>
+            <button type="button" class="color-button" data-color="#ff3333" aria-label="Red glow" title="Red" style="background-color: #ff3333;"></button>
+            <button type="button" class="color-button" data-color="#ffcc00" aria-label="Yellow glow" title="Yellow" style="background-color: #ffcc00;"></button>
+            <button type="button" class="color-button" data-color="#00ffff" aria-label="Cyan glow" title="Cyan" style="background-color: #00ffff;"></button>
+            <button type="button" class="color-button" data-color="#aa00ff" aria-label="Purple glow" title="Purple" style="background-color: #aa00ff;"></button>
+            <button type="button" class="color-button" data-color="#ff00aa" aria-label="Pink glow" title="Pink" style="background-color: #ff00aa;"></button>
+        </div>
     </div>
 
     <script src="script.js"></script>
