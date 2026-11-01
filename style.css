@@ -81,9 +81,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 800px;
-    max-width: calc(100vw - 32px);
-    margin: 0 auto 20px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    margin-bottom: 20px;
     padding: 10px 24px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
@@ -110,10 +111,7 @@ body {
 }
 
 .current-word {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(3px, 0.8vw, 9px);
+    display: block;
     color: #fff;
     font-size: clamp(30px, 5vw, 48px);
     font-weight: 800;
@@ -121,7 +119,8 @@ body {
 }
 
 .char {
-    flex: 0 0 auto;
+    display: inline-block;
+    margin: 0 3px;
     color: rgba(255, 255, 255, 0.68);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.18);
 }

@@ -9,9 +9,18 @@ const fallbackWords = [
 ];
 let wordList = [];
 const activeNotes = [];
+const rhythmValues = [1, 0.5, 0.25, 2];
 
 function getRandomWord() {
     return wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
+}
+
+function getRandomRhythmValue() {
+    const roll = Math.random();
+    if (roll < 0.6) return rhythmValues[0];
+    if (roll < 0.8) return rhythmValues[1];
+    if (roll < 0.9) return rhythmValues[2];
+    return rhythmValues[3];
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,11 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentWord = '';
     let nextWord = '';
     let currentLetterIndex = 0;
+    let nextLetterToSpawnIndex = 0;
+    let currentWordRhythms = [];
     let letterResults = [];
     let audioContext = null;
     let isRunning = false;
     let isStarting = false;
     let nextBeatAt = 0;
+    let nextNoteAt = 0;
 
     function renderCurrentWord() {
         previousWordDisplay.textContent = prevWord;
@@ -70,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWord = getRandomWord();
         nextWord = getRandomWord();
         currentLetterIndex = 0;
+        nextLetterToSpawnIndex = 0;
+        currentWordRhythms = Array.from(currentWord, getRandomRhythmValue);
         letterResults = Array.from(currentWord, () => '');
         renderCurrentWord();
     }
@@ -79,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWord = nextWord;
         nextWord = getRandomWord();
         currentLetterIndex = 0;
+        nextLetterToSpawnIndex = 0;
+        currentWordRhythms = Array.from(currentWord, getRandomRhythmValue);
         letterResults = Array.from(currentWord, () => '');
         renderCurrentWord();
     }
@@ -131,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleKeyPress(key) {
         const now = performance.now();
-        const currentNote = activeNotes[0];
+        const currentNote = activeNotes.find(note => note.letterIndex === currentLetterIndex);
         if (!currentNote || currentNote.key !== key) return;
 
         const difference = Math.abs(now - currentNote.targetAt);
@@ -148,18 +164,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (combo > 0) comboDisplay.textContent = `${combo} COMBO`;
     }
 
-    function spawnNote(beatAt) {
-        if (activeNotes.length || currentLetterIndex >= currentWord.length) return;
+    function spawnNote(spawnAt) {
+        if (nextLetterToSpawnIndex >= currentWord.length) return;
 
-        const letterIndex = currentLetterIndex;
+        const letterIndex = nextLetterToSpawnIndex;
         const key = currentWord[letterIndex].toLowerCase();
         const element = document.createElement('div');
         const note = {
             key,
             letterIndex,
             element,
-            startAt: beatAt,
-            targetAt: beatAt + fallDuration,
+            startAt: spawnAt,
+            targetAt: spawnAt + fallDuration,
             glowing: false
         };
 
@@ -169,6 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
         gameArea.append(element);
         activeNotes.push(note);
         element.style.left = `${(gameArea.clientWidth - noteSize) / 2}px`;
+        nextLetterToSpawnIndex += 1;
+        nextNoteAt = spawnAt + beatDuration * currentWordRhythms[letterIndex];
     }
 
     function gameLoop(now) {
@@ -177,8 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (now >= nextBeatAt) {
             playTick();
             pulseBeat();
-            spawnNote(now);
-            nextBeatAt = now + beatDuration;
+            nextBeatAt += beatDuration;
+            if (nextBeatAt <= now) nextBeatAt = now + beatDuration;
+        }
+
+        if (nextLetterToSpawnIndex < currentWord.length && now >= nextNoteAt) {
+            spawnNote(nextNoteAt);
         }
 
         const targetY = judgmentLine.offsetTop + judgmentLine.offsetHeight / 2 - noteSize / 2;
@@ -247,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isRunning = true;
         startButton.hidden = true;
         nextBeatAt = performance.now() + 100;
+        nextNoteAt = nextBeatAt;
         requestAnimationFrame(gameLoop);
     });
 
