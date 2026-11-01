@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rhythm Game Foundation</title>
+    <title>Keyboard Rhythm Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,7 +12,16 @@
         <div class="bg-overlay"></div>
     </div>
 
+    <div class="game-hud" aria-label="Game score">
+        <div>Score <span id="score">0</span></div>
+        <div><span id="combo">0 COMBO</span></div>
+    </div>
+
     <main class="keyboard-container">
+        <section id="game-area" aria-label="Rhythm game playfield">
+            <div class="judgment-line" aria-hidden="true"></div>
+            <div class="judgment-feedback" aria-live="polite" aria-atomic="true"></div>
+        </section>
         <div class="keyboard">
             <div class="key-row">
                 <div class="key" data-key="q">Q</div>
