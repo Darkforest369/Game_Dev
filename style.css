@@ -117,18 +117,18 @@ body {
     text-shadow: 0 0 12px rgba(255, 255, 255, 0.32);
 }
 
-.word-letter {
+.char {
     color: rgba(255, 255, 255, 0.68);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.18);
 }
 
-.word-letter.hit {
+.char.correct {
     color: #8dffcf;
     text-decoration: line-through;
     text-shadow: 0 0 10px rgba(76, 255, 180, 0.8);
 }
 
-.word-letter.missed {
+.char.missed {
     color: #ff8a8a;
     text-decoration: line-through;
     text-shadow: 0 0 10px rgba(255, 80, 80, 0.7);

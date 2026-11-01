@@ -7,7 +7,8 @@ const fallbackWords = [
     'often', 'people', 'place', 'point', 'problem', 'program', 'right', 'something', 'sound', 'start',
     'still', 'system', 'think', 'through', 'together', 'under', 'until', 'water', 'where', 'world'
 ];
-let wordList = fallbackWords;
+let wordList = [];
+const activeNotes = [];
 
 function getRandomWord() {
     return wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
@@ -25,13 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameArea = document.querySelector('#game-area');
     const judgmentLine = document.querySelector('.judgment-line');
     const feedback = document.querySelector('.judgment-feedback');
-    const previousWordDisplay = document.querySelector('#previous-word');
+    const previousWordDisplay = document.querySelector('#prev-word');
     const currentWordDisplay = document.querySelector('#current-word');
     const nextWordDisplay = document.querySelector('#next-word');
     const startButton = document.querySelector('#start-button');
     const scoreDisplay = document.querySelector('#score');
     const comboDisplay = document.querySelector('#combo');
-    const notes = [];
     const glowTimers = new WeakMap();
     const noteSize = 40;
     const bpm = 100;
@@ -41,15 +41,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let score = 0;
     let combo = 0;
     let prevWord = '';
-    let currentWord = getRandomWord();
-    let nextWord = getRandomWord();
-    let nextLetterIndex = 0;
-    let wordResults = Array.from(currentWord, () => null);
+    let currentWord = '';
+    let nextWord = '';
+    let currentLetterIndex = 0;
+    let letterResults = [];
     let audioContext = null;
     let isRunning = false;
+    let isStarting = false;
     let nextBeatAt = 0;
 
-    function renderWord() {
+    function renderCurrentWord() {
         previousWordDisplay.textContent = prevWord;
         nextWordDisplay.textContent = nextWord;
         currentWordDisplay.replaceChildren();
@@ -57,8 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         Array.from(currentWord).forEach((letter, index) => {
             const letterElement = document.createElement('span');
-            letterElement.className = 'word-letter';
-            if (wordResults[index]) letterElement.classList.add(wordResults[index]);
+            letterElement.className = 'char';
+            if (letterResults[index]) letterElement.classList.add(letterResults[index]);
             letterElement.textContent = letter;
             currentWordDisplay.append(letterElement);
         });
@@ -68,18 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
         prevWord = '';
         currentWord = getRandomWord();
         nextWord = getRandomWord();
-        nextLetterIndex = 0;
-        wordResults = Array.from(currentWord, () => null);
-        renderWord();
+        currentLetterIndex = 0;
+        letterResults = Array.from(currentWord, () => '');
+        renderCurrentWord();
     }
 
     function shiftWordStream() {
         prevWord = currentWord;
         currentWord = nextWord;
         nextWord = getRandomWord();
-        nextLetterIndex = 0;
-        wordResults = Array.from(currentWord, () => null);
-        renderWord();
+        currentLetterIndex = 0;
+        letterResults = Array.from(currentWord, () => '');
+        renderCurrentWord();
     }
 
     function triggerKeyGlow(key) {
@@ -108,56 +109,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resolveNote(note, result) {
-        const noteIndex = notes.indexOf(note);
+        const noteIndex = activeNotes.indexOf(note);
         if (noteIndex === -1) return;
 
-        notes.splice(noteIndex, 1);
-        wordResults[note.letterIndex] = result;
-        renderWord();
-        if (result === 'hit') {
+        activeNotes.splice(noteIndex, 1);
+        letterResults[note.letterIndex] = result;
+        if (result === 'correct') {
             note.element.classList.add('hit');
             setTimeout(() => note.element.remove(), 160);
         } else {
             note.element.remove();
         }
 
-        if (nextLetterIndex === currentWord.length && wordResults.every(Boolean)) shiftWordStream();
+        currentLetterIndex += 1;
+        if (currentLetterIndex >= currentWord.length) {
+            shiftWordStream();
+        } else {
+            renderCurrentWord();
+        }
     }
 
     function handleKeyPress(key) {
         const now = performance.now();
-        const currentNote = notes.reduce((lowestNote, note) => (
-            !lowestNote || note.targetAt < lowestNote.targetAt ? note : lowestNote
-        ), null);
-        if (!currentNote || currentNote.key !== key) {
-            if (currentNote) showJudgment('WRONG KEY');
-            return;
-        }
+        const currentNote = activeNotes[0];
+        if (!currentNote || currentNote.key !== key) return;
 
         const difference = Math.abs(now - currentNote.targetAt);
         if (difference > hitWindow) return;
 
-        resolveNote(currentNote, 'hit');
+        resolveNote(currentNote, 'correct');
         triggerKeyGlow(key);
 
-        if (difference <= 50) {
-            score += 100;
-            combo += 1;
-            showJudgment('PERFECT');
-        } else {
-            score += 50;
-            combo += 1;
-            showJudgment('GOOD');
-        }
+        score += 100;
+        combo += 1;
+        showJudgment('PERFECT');
 
         scoreDisplay.textContent = String(score);
         if (combo > 0) comboDisplay.textContent = `${combo} COMBO`;
     }
 
     function spawnNote(beatAt) {
-        if (nextLetterIndex >= currentWord.length) return;
+        if (activeNotes.length || currentLetterIndex >= currentWord.length) return;
 
-        const letterIndex = nextLetterIndex;
+        const letterIndex = currentLetterIndex;
         const key = currentWord[letterIndex].toLowerCase();
         const element = document.createElement('div');
         const note = {
@@ -173,15 +167,23 @@ document.addEventListener('DOMContentLoaded', () => {
         element.textContent = key.toUpperCase();
         element.setAttribute('aria-hidden', 'true');
         gameArea.append(element);
-        notes.push(note);
+        activeNotes.push(note);
         element.style.left = `${(gameArea.clientWidth - noteSize) / 2}px`;
-        nextLetterIndex += 1;
     }
 
-    function animateNotes(now) {
+    function gameLoop(now) {
+        if (!isRunning) return;
+
+        if (now >= nextBeatAt) {
+            playTick();
+            pulseBeat();
+            spawnNote(now);
+            nextBeatAt = now + beatDuration;
+        }
+
         const targetY = judgmentLine.offsetTop + judgmentLine.offsetHeight / 2 - noteSize / 2;
 
-        notes.slice().forEach(note => {
+        activeNotes.slice().forEach(note => {
             const duration = note.targetAt - note.startAt;
             const progress = Math.min(1, (now - note.startAt) / duration);
             const top = -noteSize + (targetY + noteSize) * progress;
@@ -199,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        requestAnimationFrame(animateNotes);
+        requestAnimationFrame(gameLoop);
     }
 
     function playTick() {
@@ -226,24 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => judgmentLine.classList.remove('pulse'), 180);
     }
 
-    function scheduleBeat() {
-        if (!isRunning) return;
-
-        const delay = Math.max(0, nextBeatAt - performance.now());
-        setTimeout(() => {
-            if (!isRunning) return;
-
-            const beatAt = nextBeatAt;
-            playTick();
-            pulseBeat();
-            spawnNote(beatAt);
-            nextBeatAt += beatDuration;
-            scheduleBeat();
-        }, delay);
-    }
-
     startButton.addEventListener('click', async () => {
-        if (isRunning) return;
+        if (isRunning || isStarting || !wordList.length) return;
+        isStarting = true;
 
         try {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -251,15 +238,16 @@ document.addEventListener('DOMContentLoaded', () => {
             audioContext = new AudioContextClass();
             await audioContext.resume();
         } catch {
+            isStarting = false;
             showJudgment('AUDIO UNAVAILABLE');
             return;
         }
 
+        isStarting = false;
         isRunning = true;
-        initializeWordStream();
         startButton.hidden = true;
         nextBeatAt = performance.now() + 100;
-        scheduleBeat();
+        requestAnimationFrame(gameLoop);
     });
 
     window.addEventListener('keydown', event => {
@@ -286,19 +274,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    renderWord();
     fetch('https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt')
         .then(response => {
             if (!response.ok) throw new Error('Dictionary request failed');
             return response.text();
         })
         .then(dictionary => {
-            const fetchedWords = dictionary.split('\n').map(word => word.trim()).filter(word => word.length >= 3);
-            if (fetchedWords.length) wordList = fetchedWords;
-            if (!isRunning) initializeWordStream();
+            const fetchedWords = dictionary.split('\n')
+                .map(word => word.trim())
+                .filter(word => /^[a-z]{3,}$/i.test(word));
+            if (!fetchedWords.length) throw new Error('Dictionary response contained no usable words');
+            wordList = fetchedWords;
         })
-        .catch(() => {
+        .catch(error => {
+            console.warn('Dictionary could not be loaded; using fallback words.', error);
             wordList = fallbackWords;
+        })
+        .finally(() => {
+            initializeWordStream();
+            startButton.disabled = false;
         });
-    requestAnimationFrame(animateNotes);
 });

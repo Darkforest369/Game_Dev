@@ -19,12 +19,12 @@
 
     <main class="keyboard-container">
         <div class="word-stream" aria-label="Word stream">
-            <span class="stream-word previous-word" id="previous-word" aria-hidden="true"></span>
+            <span class="stream-word previous-word" id="prev-word" aria-hidden="true"></span>
             <span class="stream-word current-word" id="current-word" aria-label="Current target word"></span>
             <span class="stream-word next-word" id="next-word" aria-hidden="true"></span>
         </div>
         <section id="game-area" aria-label="Rhythm game playfield">
-            <button type="button" class="start-button" id="start-button">Start Game</button>
+            <button type="button" class="start-button" id="start-button" disabled>Start Game</button>
             <div class="judgment-line" aria-hidden="true"></div>
             <div class="judgment-feedback" aria-live="polite" aria-atomic="true"></div>
         </section>
