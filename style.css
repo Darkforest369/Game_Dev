@@ -1,5 +1,19 @@
-html,
+:root {
+    --glow-color: #00FFFF;
+    --key-bg: rgba(20, 25, 35, 0.85);
+    --key-border: rgba(255, 255, 255, 0.1);
+    --key-text: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
 body {
+<<<<<<< HEAD
   margin: 0;
   padding: 0;
   width: 100%;
@@ -21,3 +35,154 @@ body {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+=======
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+
+/* Background */
+.background-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(12px);
+    z-index: -2;
+    transform: scale(1.05); /* Prevents blurry white edges on some browsers */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.65);
+    z-index: -1;
+}
+
+/* Keyboard Layout */
+.keyboard-container {
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 40px;
+}
+
+.key-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.row-2 {
+    transform: translateX(20px); /* Stagger for standard layout */
+}
+
+.row-3 {
+    transform: translateX(60px);
+}
+
+/* Individual Keys */
+.key {
+    width: 64px;
+    height: 64px;
+    background-color: var(--key-bg);
+    border: 2px solid var(--key-border);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--key-text);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.05);
+    transition: all 0.2s ease-out; /* Smooth fade out */
+}
+
+/* Active Key State (Pressed) */
+.key.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--glow-color);
+    box-shadow: 
+        0 0 15px var(--glow-color), 
+        0 0 30px var(--glow-color),
+        inset 0 0 10px var(--glow-color);
+    transform: scale(0.95);
+    transition: all 0.05s ease-out; /* Instant glow */
+    color: #fff;
+    text-shadow: 0 0 8px var(--glow-color);
+}
+
+/* Glassmorphism Settings Panel */
+.settings-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.settings-panel label {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Color Picker Styling */
+input[type="color"] {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+}
+
+input[type="color"]::-moz-color-swatch {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+}
+>>>>>>> 0e96835 (Add game UI components and background image; remove old main.js)
