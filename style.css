@@ -81,9 +81,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    width: 800px;
     max-width: calc(100vw - 32px);
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
     padding: 10px 24px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
@@ -95,21 +95,24 @@ body {
 }
 
 .stream-word {
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
     white-space: nowrap;
 }
 
 .previous-word,
 .next-word {
-    max-width: 22vw;
     color: rgba(255, 255, 255, 0.4);
     font-size: 24px;
 }
 
 .current-word {
     display: flex;
-    max-width: 52vw;
+    align-items: center;
+    justify-content: center;
     gap: clamp(3px, 0.8vw, 9px);
     color: #fff;
     font-size: clamp(30px, 5vw, 48px);
@@ -118,6 +121,7 @@ body {
 }
 
 .char {
+    flex: 0 0 auto;
     color: rgba(255, 255, 255, 0.68);
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.18);
 }
